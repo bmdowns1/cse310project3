@@ -3,7 +3,7 @@ using namespace std;
 int main(int argc, char** argv)
 {
 	string fileName = "test.txt";
-	bool isDirected = false;
+	bool isDirected = true;
 	//command line interpreter for ./dijkstra <graph> <direction>
 	/*
 	if (argc > 2) //correct num of arguments

@@ -1,9 +1,12 @@
 typedef struct vertex
 {
-	int id;
-	int d = 999999999;
-	int pi = 0;
+	int id = -1;
+	int color = 0; //0 white 1 grey 2 black
+	double distance = 214748364;
+	int predecessor = 0;
+	int pos = -1;
 }vertex;
+
 typedef struct vertex* vertexes;
 typedef struct heap
 {
@@ -12,12 +15,12 @@ typedef struct heap
 	int size;
 	int capacity;
 }HEAP;
-void decreaseKey(HEAP* heap, int index, int val, int flag);
-HEAP* initializeHeap(int n, int source);
-bool isEmpty(HEAP* heap);
+HEAP* initializeHeap(int n);
 vertex* extractMin(HEAP* heap, int flag);
-bool isInHeap(HEAP* heap, int index);
-void insertHeap(HEAP* heap, vertex* v);
+bool isInHeap(HEAP* heap, vertex vert);
+void insertHeap(HEAP* heap, vertex* v, int flag);
 void upwardHeapify(HEAP* heap, int index);
 void heapify(HEAP* heap, int size, int index);
 int parent(int i);
+bool isHeapEmpty();
+void decreaseKey(HEAP* heap, vertex* v, double distance, int flag);
