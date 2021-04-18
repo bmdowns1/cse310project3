@@ -1,7 +1,6 @@
-#include "util.h";
+﻿#include "util.h";
 #include <fstream>;
 #include <iostream>;
-
 
 std::string* parseFileData(std::string fileName)
 {
@@ -34,7 +33,7 @@ std::string* parseFileData(std::string fileName)
 }
 int getFileVertexes(std::string fileName)
 {
-	int numVertexes = INT_MAX;
+	int numVertexes = 214748364;
 	std::ifstream file;
 	file.open(fileName);
 	if (file.is_open())
@@ -45,8 +44,8 @@ int getFileVertexes(std::string fileName)
 }
 int getFileEdges(std::string fileName)
 {
-	int numEdges = INT_MAX;
-	int numVertexes = INT_MAX;
+	int numEdges = 214748364;
+	int numVertexes = 214748364;
 	std::ifstream file;
 	file.open(fileName);
 	if (file.is_open())
@@ -61,15 +60,16 @@ adjList getCommand(adjList a)
 	std::string line;
 	std::string command;
 	int source, destination, flag;
-	int s, d;
-
+	int s = 0;
+	int d = 0;
+	vertex* vertexList = new vertex();
 	while (1)
 	{
 		std::cin >> line;
 		command = line.substr(0, line.find(" "));
 		if (command == "find") {
 			std::cin >> source; std::cin >> destination; std::cin >>flag;
-			if (source == NULL || destination == NULL || !(flag == 0 || flag == 1) )
+			if (source == NULL || destination == NULL || !(flag == 0 || flag == 1) || source > a.numVertexes || source <= 0 )
 			{
 				std::cout << "Error: invalid find query\n";
 				std::cin.clear();
@@ -79,48 +79,69 @@ adjList getCommand(adjList a)
 				command = "";
 			}
 			else {
-				std::cout << "find" << " -> Source:" << source << " " << "Dest:" << destination << " " << "Flag:" << flag << " " << std::endl;
-				shortestPath(&a, source, destination, flag);
+				std::cout << "Query: find " << source << " " << destination << " " << flag << std::endl;
+				s = source;
+				d = destination;
+				vertexList = dijkstra(&a, source, destination, flag);
 			}
 		}
 		else if (command == "write") { 
-			/*
-			std::cin >> line; std::cin >> s; std::cin >> d;
-			std::cout << "write path" << " -> s:" << s << " " << "d:" << d <<  std::endl;
-			if (getQueryCount() == 0)
+			std::cin >> line; std::cin >> source; std::cin >> destination;
+			if (s == 0 || d == 0)
 			{
-				std::cout << "Error: no path computation done\n";
-
+				std::cout << "Error: no path computation done\n" << std::endl;
 			}
-			else if (!(isQueried(s, d)))
+			if (source == NULL || destination == NULL || source > a.numVertexes || destination > a.numVertexes || source <= 0 || destination <= 0 || s != source)
 			{
+				std::cout << "Query: write " << source << " " << destination << std::endl;
 				std::cout << "Error: invalid source destination pair\n";
+				std::cin.clear();
+				std::cin.ignore(INT_MAX, '\n');
+				std::cin.clear();
+				line = "";
+				command = "";
 			}
-			else if(!(isQueriedPathShortest(s,d)))
-			{
-				std::cout << "Shortest path: " << queriedPath(s,d) << std::endl;
-				std::cout << "The path weight is :" << queriedWeight(s,d) << std::endl;
+			else {
+				std::cout << "Query: write " << source << " " << destination << std::endl;
+				/*case 1 THE SHORTEST PATH HAS BEEN COMPUTED */
+				//IF BOTH NODES ARE BLACK OR IF DJISTRA VERTEXLIST = VERTEXLIST
+
+				if (( (vertexList[destination - 1].color == 2 && vertexList[source - 1].color == 2) /* ||
+					vertexList == dijkstra(&a, source, destination, 0)*/))
+				{
+					std::cout << "Shortest path: "; 
+					shortestPath(source, destination, vertexList);
+					std::cout << "The path weight is : ";
+					weightOf(source, destination, vertexList);
+				}
+				/*case 2 THE PATH IS COMPUTED BUT IS NOT KNOWN TO BE THE SHORTEST */
+				//IF THE DESTINATION IS STILL IN THE HEAP (GREY) AND DJI(SOURCE, DESTINATION).DISTANCE != INFINITY
+				else if (vertexList[destination - 1].distance != 214748364 && vertexList[destination-1].color == 1){
+					std::cout << "Path not known to be shortest : ";
+					shortestPath(source, destination, vertexList);
+					std::cout << "The path weight is: ";
+					weightOf(source, destination, vertexList);
+				}
+				/*case 4 THE PATH DOES NOT EXIST */
+				//IF THE QUEUE IS EMPTY AND DESTINATION IS WHITE
+				//isHeapEmpty() && vertexList[destination - 1].color == 0
+				else if (isHeapEmpty() && vertexList[destination - 1].color == 0) { std::cout << "No " << source << "-" << destination << " path exists." << std::endl; }
+				/*case 3 THE PATH HAS NOT BEEN COMPUTED YET BUT COULD STILL EXIST */
+				//IF THE QUEUE IS NOT EMPTY AND DESTINATION IS WHITE
+				// old if (!(isHeapEmpty())) && vertexList[destination - 1].color == 0
+				else if (vertexList[destination -1].color == 1 || vertexList[destination - 1].distance == 214748364)
+				{
+					std::cout << "No " << source << "-" << destination << " path has been computed." << std::endl;
+				}
+				/*unforeseen case 5*/
+				else{ std::cout << "case 5" << std::endl; }
 			}
-			else
-			{
-				std::cout << "Path not known to be shortest :" << queriedPath(s, d) << std::endl;
-				std::cout << "The path weight is :" << queriedWeight(s, d) << std::endl;
-				//No s-d path exists in the graph G.
-				//No s-d path has been computed.
-			}
-			*/
 		}
-		else if (command == "stop") { std::cout << "stop" << std::endl; garbage(a); exit(0); }
+		else if (command == "stop") { printf("Query: stop\n");/*FREE THE MF MEMORY HERE */exit(0); }
 		else if (command == "") {}
 		else { std::cout << "invalid input" << command << std::endl; }
 		line = "";
 		std::cin.clear();
-
-		//find <source> <destination> <flag>
-		//write path <s> <d>
-		//stop
-
-
 	}
 	return a;
 }

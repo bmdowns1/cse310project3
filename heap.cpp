@@ -1,6 +1,9 @@
 #include "heap.h"
 #include <climits>
-HEAP* initializeHeap(int n, int source)
+#include <iostream>
+
+bool isEmpty;
+HEAP* initializeHeap(int n)
 {
 	HEAP* heap = new HEAP();
 	heap->numVertexes = n;
@@ -9,34 +12,41 @@ HEAP* initializeHeap(int n, int source)
 	{
 		ptrs[i] = new vertex();
 	}
-	ptrs[0]->id = source;
-	ptrs[0]->d = INT_MAX;
-	ptrs[0]->pi = NULL;
 	heap->v = ptrs;
-	heap->size = 1;
+	heap->size = 0;
 	heap->capacity = heap->numVertexes;
 	return heap;
 }
-void decreaseKey(HEAP* heap, int vertex, int val, int flag)
-{																					
-	heap->v[0]->d = val;													 
-	upwardHeapify(heap, vertex);
-}
 vertex* extractMin(HEAP* heap, int flag)
 {
+	heap->v[0]->pos = 0;
 	vertex* vert = heap->v[0];
-	heap->v[0]->d = heap->v[heap->size - 1]->d;
+	heap->v[0] = heap->v[heap->size - 1];
 	heap->size--;
+	heap->v[0]->pos = 1;
+	if (heap->size == 0)
+	{
+		isEmpty = true;
+	}
+
+	if (flag == 1) {
+		printf("Delete vertex% d, key = % 12.4f\n", vert->id, vert->distance);
+	}
 	heapify(heap, heap->size, 0);
 	return vert;
 }
 void upwardHeapify(HEAP* heap, int index)
 {
-	for (int i = index; heap->v[i]->d < heap->v[parent(i)]->d && i != 0; i = parent(i))
+	for (int i = index; heap->v[i]->distance < heap->v[parent(i)]->distance && i != 0; i = parent(i))
 	{
+		//swap vertexes
 		vertex* vert = heap->v[i];
 		heap->v[i] = heap->v[parent(i)];
 		heap->v[parent(i)] = vert;
+		//swap positions
+		int tmp  = heap->v[i]->pos;
+		heap->v[i]->pos = heap->v[parent(i)]->pos;
+		heap->v[parent(i)]->pos = tmp;
 	}
 }
 void heapify(HEAP *heap, int size, int index) 
@@ -45,12 +55,12 @@ void heapify(HEAP *heap, int size, int index)
 	int right = ((2 * index) + 2);
 	int least = index;
 	if (left < heap->size){
-		if (heap->v[left]->d < heap->v[least]->d) {
+		if (heap->v[left]->distance < heap->v[least]->distance) {
 			least = left;
 		}
 	}
 	if (right < heap->size) {
-		if (heap->v[right]->d < heap->v[least]->d) {
+		if (heap->v[right]->distance < heap->v[least]->distance) {
 			least = right;
 		}
 	}
@@ -59,6 +69,11 @@ void heapify(HEAP *heap, int size, int index)
 		vertex tmp = *heap->v[index];
 		heap->v[index] = heap->v[least];
 		*heap->v[least] = tmp;
+
+		int tmpPos = heap->v[index]->pos;
+		heap->v[index]->pos = heap->v[least]->pos;
+		heap->v[least]->pos = tmpPos;
+
 		heapify(heap, size, least);
 	}
 }
@@ -66,30 +81,40 @@ int parent(int i)
 {
 	return ((i - 1) / 2);
 }
-bool isEmpty(HEAP* heap)
-{
-	if (heap->size == 0)
-	{
-		return true;
-	}
-	return false;
-}
-bool isInHeap(HEAP* heap, int index)
+bool isInHeap(HEAP* heap, vertex vert)
 {
 	for (int i = 0; i < heap->size; i++)
 	{
-		if (heap->v[0]->id == index)
+		if (heap->v[0]->id == vert.id)
 		{
 			return true;
 		}
 	}
 	return false;
 }
-void insertHeap(HEAP* heap, vertex* v)
+void insertHeap(HEAP* heap, vertex* v, int flag)
 {
-	if (heap->capacity >= heap->size)
-	{
+		isEmpty = false;
+		v->pos = heap->size + 1;
 		heap->v[heap->size] = v;
+		if (flag == 1)
+		{
+			printf("Insert vertex % d, key = % 12.4f\n", v->id, heap->v[heap->size]->distance);
+		}
 		heap->size++;
+		upwardHeapify(heap, heap->size-1);
+	
+}
+void decreaseKey(HEAP* queue, vertex* v, double distance, int flag)
+{
+	if (flag == 1)
+	{
+		printf("Decrease key of vertex %d, from %12.4f to %12.4f\n", v->id, v->distance, distance);
 	}
+	queue->v[v->pos-1]->distance = distance;
+	upwardHeapify(queue, v->pos-1);
+}
+bool isHeapEmpty()
+{
+	return isEmpty;
 }
