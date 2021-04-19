@@ -27,6 +27,7 @@ std::string* parseFileData(std::string fileName)
 			word += (line + " ");
 			data[i] = word;	
 		}
+		file.close();
 		return data;
 	}
 	return NULL;
@@ -63,6 +64,7 @@ adjList getCommand(adjList a)
 	int s = 0;
 	int d = 0;
 	vertex* vertexList = new vertex();
+
 	while (1)
 	{
 		std::cin >> line;
@@ -82,6 +84,7 @@ adjList getCommand(adjList a)
 				std::cout << "Query: find " << source << " " << destination << " " << flag << std::endl;
 				s = source;
 				d = destination;
+				delete vertexList;
 				vertexList = dijkstra(&a, source, destination, flag);
 			}
 		}
@@ -137,7 +140,7 @@ adjList getCommand(adjList a)
 				else{ std::cout << "case 5" << std::endl; }
 			}
 		}
-		else if (command == "stop") { printf("Query: stop\n");/*FREE THE MF MEMORY HERE */exit(0); }
+		else if (command == "stop") { printf("Query: stop\n");/*FREE vertexList */exit(0); }
 		else if (command == "") {}
 		else { std::cout << "invalid input" << command << std::endl; }
 		line = "";

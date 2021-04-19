@@ -3,6 +3,7 @@
 #include <iostream>
 
 bool isEmpty;
+
 HEAP* initializeHeap(int n)
 {
 	HEAP* heap = new HEAP();
@@ -114,6 +115,9 @@ void decreaseKey(HEAP* queue, vertex* v, double distance, int flag)
 	queue->v[v->pos-1]->distance = distance;
 	upwardHeapify(queue, v->pos-1);
 }
+
+
+
 bool isHeapEmpty()
 {
 	return isEmpty;

@@ -1,28 +1,17 @@
 #include "graph.h"
-
 using namespace std;
 adjList initializeAdjList(int numEdges, int numVertexes, bool isDirected)
 {
-	//declare and intialize an adjlist
-	adjList* a = ((adjList*)malloc(sizeof(adjList)));
-	/*a->numEdges = (int)malloc(sizeof(numEdges));
-	a->numVertexes = (int)malloc(sizeof(numVertexes));
-	a->isDirected = (int)malloc(sizeof(bool));
-	*/
+	adjList* a = new adjList();
 	a->isDirected = isDirected;
 	a->numEdges = numEdges;
 	a->numVertexes = numVertexes;
+	a->e = new edge*[numVertexes]; 
 
-	edge** e = new edge*[numVertexes]; 
-	for (int i = 0; i < numVertexes; ++i)
+	for (int i = 0; i < numVertexes; i++)
 	{
-		e[i] = new edge[numVertexes];
-		e[i]->init = false;
+		a->e[i] = new edge();
 	}
-	a->e = e;
-	a->numEdges = numEdges;
-	a->numVertexes = numVertexes;
-	a->isDirected = isDirected;
 	return *a;
 }
 adjList populateAdjList(string* data, adjList a)
@@ -37,144 +26,55 @@ adjList populateAdjList(string* data, adjList a)
 		std::string tVVertex = tmp.substr(0, tmp.find(delimiter));
 		tmp = tmp.substr(tmp.find(delimiter) + 1, tmp.length());
 		std::string tWeight = tmp.substr(0, data[i].length());
-
 		int uVertex = atoi(tUVertex.c_str());
 		int vVertex = atoi(tVVertex.c_str());
 		double weight = stod(tWeight.c_str());
+		edge* node = a.e[uVertex - 1];
+		if (!(a.e[uVertex - 1]->init)) {
 
-
-		for (int i = 0; i < a.numVertexes; i++) //iterating through v adjlist
-		{
-			if (uVertex == i + 1)
+			node->u = uVertex;
+			node->v = vVertex;
+			node->init = true;
+			node->weight = weight;
+		}
+		else { //isDirected //isNotDirected
+			bool noDuplicate = true;
+			//Route 1: leave the duplicate edges in, djis will take care of it
+			//route 2: handle the duplicates, but then we have to manually relax the weight
+			if (noDuplicate)
 			{
-				//is a.e[i][0] initialized
-				if (a.e[i][0].init)
-				{
-					int index = 0;
-					int j = a.numVertexes - 1;
-					bool loop = true;
-					//grab rightmost node
-
-					while(j > 0 && loop)
-					{
-						if (a.e[i][j].init)
-						{
-							index = j;
-							loop = false;
-						}
-						j--;
-					}
-
-
-					while (index != -1)
-					{
-						a.e[i][index + 1] = a.e[i][index];
-						index--;
-					}
-					//save in first spot
-					a.e[i][0].u = uVertex;
-					a.e[i][0].v = vVertex;
-					a.e[i][0].weight = weight;
-					a.e[i][0].init = true;
-				}
-				else
-				{
-					a.e[i][0].u = uVertex;
-					a.e[i][0].v = vVertex;
-					a.e[i][0].weight = weight;
-					a.e[i][0].init = true;
-				}
+				edge* initial = new edge();
+				initial->u = uVertex;
+				initial->v = vVertex;
+				initial->init = true;
+				initial->weight = weight;
+				initial->next = a.e[uVertex - 1];
+				a.e[uVertex - 1] = initial;
 			}
 		}
 	}
 	return a;
 }
-				/*
-			if (uVertex == i + 1)
-			{
-				for (int j = 0; j < a.numVertexes; j++)
-				{
-					if (a.e[i][j].init != true)
-					{
-						a.e[i][j].u = uVertex;
-						a.e[i][j].v = vVertex;
-						a.e[i][j].weight = weight;
-						a.e[i][j].init = true;
-						break;
-					}
-				}
-			}
-			*/
-/*
-			bool noDuplicateEdge = true;
-			if ((!(a.isDirected)) && vVertex == i + 1)
-			{
-				for (int j = 0; j < a.numVertexes; j++)
-				{
-					if (a.e[i][j].init != true)
-					{
-						if (a.e[i][j].v == uVertex)
-						{
-							noDuplicateEdge = false;
-						}
-					}
-				}
-				if (noDuplicateEdge)
-				{
-					for (int j = 0; j < a.numVertexes; j++)
-					{
-						if (a.e[i][j].init != true)
-						{
-							a.e[i][j].u = vVertex;
-							a.e[i][j].v = uVertex;
-							a.e[i][j].weight = weight;
-							a.e[i][j].init = true;
-							break;
-						}
-					}
-				}
-			}
-		}
-	}
-	/*
-	for (int i = 0; i < a.numVertexes; i++) //through rows
-	{
-		for (int j = 0; j < a.numVertexes-1; j++) //through columns n^2
-		{
-			if (a.e[i][j].v > a.e[i][j + 1].v && (a.e[i][j + 1].init && a.e[i][j].init))
-			{
-				edge tmp = a.e[i][j];
-				a.e[i][j] = a.e[i][j + 1];
-				a.e[i][j + 1] = tmp;
-				j = -1;
-			}
-		}
-		
-	}
-	*/
+
 void printAdjList(adjList a)
 {
+	edge* iterator = NULL;
 	cout << "ADJ LIST:" << endl;
 	for (int i = 0; i < a.numVertexes; i++)
 	{
-		cout <<"[" <<i+1 <<"]  ";
-		for (int j = 0; j < a.numVertexes; j++)
+		cout << "[" << i+1 << "]\t";
+		iterator = a.e[i];
+		while (iterator != NULL)
 		{
-			if (a.e[i][j].init == true)
-			{
-				cout << a.e[i][j].v << " ";
-			}
+			cout << iterator->v << " ";
+			iterator = iterator->next;
 		}
 		cout << endl;
 	}
+	delete iterator;
 }
 
-vertex* shortestPath(adjList* a, int source, int destination, int flag)
-{
-	vertex* vertexList = dijkstra(a, source, destination, flag);
 
-	return vertexList;
-}
 vertex* dijkstra(adjList* adjList, int source, int destination, int flag) //1
 {
 	//populate vertex list
@@ -187,40 +87,70 @@ vertex* dijkstra(adjList* adjList, int source, int destination, int flag) //1
 	src->distance = 0;//populate source distance to itself = 0
 	src->predecessor = NULL;//populate source distance pred as no pred
 	insertHeap(queue, src, flag); //insert the vertex into the heap
-	while (queue->size != 0){ //While Q != Empty
+	while (queue->size != 0) { //While Q != Empty
 		vertex* extracted = extractMin(queue, flag); //Pop the min of the heap
 		extracted->color = 2; // u.color = black
 		vertexList[extracted->id - 1] = *extracted; //update data records
 		if (extracted->id == destination) //if u == t
 		{
 			vertexList[extracted->id - 1] = *extracted; //return 0
+			delete src;
+			delete queue;
 			return vertexList; //return 0 THE SOURCE HAS FOUND DESTINATION
 		}
-		for (int i = 0; i < adjList->numVertexes; i++) { //iterate through each endpoint/neighbor in Adjacency List for u
-			if (adjList->e[extracted->id - 1][i].init) { //if the neighbor is initialized
-				vertex* neighbor = &vertexList[adjList->e[extracted->id - 1][i].v - 1]; //neighbor v is neighbor of u
-				if (neighbor->color == 0){ //if neighbor is white
-					
-					neighbor->distance = extracted->distance + adjList->e[extracted->id - 1][i].weight; // v.d = u.d + w(u,v)
-					neighbor->predecessor = extracted->id; //v.pi = u
-					neighbor->color = 1; //v.color = grey
-					if (!(isInHeap(queue, *neighbor))){
-						{
-							insertHeap(queue, neighbor, flag);
-						}
+		//CODE THAT LOOPS THRU LINKED LIST AT adjList->e[extracted->id] and gets v
+		edge* iterator = adjList->e[extracted->id - 1];
+		while (iterator != NULL)
+		{
+			vertex* neighbor = &vertexList[iterator->v - 1];
+			if (neighbor->color == 0) { //if neighbor is white
+				neighbor->distance = extracted->distance + iterator->weight; // v.d = u.d + w(u,v)
+				neighbor->predecessor = extracted->id;
+				neighbor->color = 1;
+				if (!(isInHeap(queue, *neighbor))) {
+					{
+						insertHeap(queue, neighbor, flag);
 					}
 				}
-				
-				else if (neighbor->distance > extracted->distance + adjList->e[extracted->id - 1][i].weight) // else if v.d > u.d +w(u,v)
-				{
-					neighbor->predecessor = extracted->id;
-					decreaseKey(queue, neighbor, extracted->distance + adjList->e[extracted->id - 1][i].weight, flag);
+			}
+			else if (neighbor->distance > extracted->distance + iterator->weight) // else if v.d > u.d +w(u,v)
+			{
+				neighbor->predecessor = extracted->id;
+				decreaseKey(queue, neighbor, extracted->distance + iterator->weight, flag);										//FIX ME
+			}
+			iterator = iterator->next;
+			}
+			/*
+			for (int i = 0; i < adjList->numVertexes; i++) { //iterate through each endpoint/neighbor in Adjacency List for u
+				if (adjList->e[extracted->id - 1][i].init) { //if the neighbor is initialized																		FIX ME
+					vertex* neighbor = &vertexList[adjList->e[extracted->id - 1][i].v - 1]; //neighbor v is neighbor of u											fix me
+					if (neighbor->color == 0){ //if neighbor is white
+
+						neighbor->distance = extracted->distance + adjList->e[extracted->id - 1][i].weight; // v.d = u.d + w(u,v)									FIX ME
+						neighbor->predecessor = extracted->id; //v.pi = u
+						neighbor->color = 1; //v.color = grey
+						if (!(isInHeap(queue, *neighbor))){
+							{
+								insertHeap(queue, neighbor, flag);
+							}
+						}
+					}
+
+					else if (neighbor->distance > extracted->distance + adjList->e[extracted->id - 1][i].weight) // else if v.d > u.d +w(u,v)
+					{
+						neighbor->predecessor = extracted->id;
+						decreaseKey(queue, neighbor, extracted->distance + adjList->e[extracted->id - 1][i].weight, flag);										//FIX ME
+					}
 				}
 			}
-		} 
+			*/
+		delete iterator;
 	}
-	return vertexList; 
+		delete src;
+		delete queue;
+		return vertexList;
 }
+
 void shortestPath(int source, int destination, vertex* vertexList)
 {
 	string path = ">";
