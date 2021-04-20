@@ -29,6 +29,8 @@ adjList populateAdjList(string* data, adjList a)
 		int uVertex = atoi(tUVertex.c_str());
 		int vVertex = atoi(tVVertex.c_str());
 		double weight = stod(tWeight.c_str());
+		//Route 1: leave the duplicate edges in, djis will take care of it
+		//route 2: handle the duplicates, but then we have to manually relax the weight
 		edge* node = a.e[uVertex - 1];
 		if (!(a.e[uVertex - 1]->init)) {
 
@@ -37,10 +39,8 @@ adjList populateAdjList(string* data, adjList a)
 			node->init = true;
 			node->weight = weight;
 		}
-		else { //isDirected //isNotDirected
+		else { 
 			bool noDuplicate = true;
-			//Route 1: leave the duplicate edges in, djis will take care of it
-			//route 2: handle the duplicates, but then we have to manually relax the weight
 			if (noDuplicate)
 			{
 				edge* initial = new edge();
@@ -52,6 +52,45 @@ adjList populateAdjList(string* data, adjList a)
 				a.e[uVertex - 1] = initial;
 			}
 		}
+		//IS UNDIRECTED
+		if (!a.isDirected)
+		{
+			edge* undirectedNode = a.e[vVertex - 1];
+			if (!(a.e[vVertex - 1]->init)) {
+
+				undirectedNode->u = vVertex;
+				undirectedNode->v = uVertex;
+				undirectedNode->init = true;
+				undirectedNode->weight = weight;
+			}
+			else {
+				bool noDuplicate = true;
+			/* BROKE - HALF WORKS
+				edge* iterator = a.e[vVertex - 1];
+				while (iterator != NULL)
+				{
+					if (iterator->v == uVertex)
+					{
+						noDuplicate = false;
+					}
+					iterator = iterator->next;
+				}
+				delete iterator;
+				*/
+				if (noDuplicate)
+				{
+					edge* initial = new edge();
+					initial->u = vVertex;
+					initial->v = uVertex;
+					initial->init = true;
+					initial->weight = weight;
+					initial->next = a.e[vVertex - 1];
+					a.e[vVertex - 1] = initial;
+				}
+			}
+		}
+
+
 	}
 	return a;
 }
@@ -85,7 +124,7 @@ vertex* dijkstra(adjList* adjList, int source, int destination, int flag) //1
 	src->id = source; //populate source id
 	src->color = 1; //populate source data to GREY
 	src->distance = 0;//populate source distance to itself = 0
-	src->predecessor = NULL;//populate source distance pred as no pred
+	src->predecessor = 0;//populate source distance pred as no pred              //was NULL	
 	insertHeap(queue, src, flag); //insert the vertex into the heap
 	while (queue->size != 0) { //While Q != Empty
 		vertex* extracted = extractMin(queue, flag); //Pop the min of the heap
@@ -153,36 +192,37 @@ vertex* dijkstra(adjList* adjList, int source, int destination, int flag) //1
 
 void shortestPath(int source, int destination, vertex* vertexList)
 {
-	string path = ">";
-	path += std::to_string(destination);
+	int path[100];
+	for (int i = 0; i < 100; i++)
+	{
+		path[i] = -1;
+	}
+	path[99] = destination;
+	int j = 98;
 	int i = destination;
 	while (vertexList[i - 1].predecessor != source)
 	{
-		path += " ,";
-		path += std::to_string(vertexList[i - 1].predecessor);
+		path[j] = vertexList[i - 1].predecessor;
 		i = vertexList[i - 1].predecessor;
+		j--;
 	}
-	path += " ,";
-	path += std::to_string(vertexList[i - 1].predecessor);
-	path += "<";
+	path[j] = source;
+	cout << "<";
 
-	//path is the reversed string
-	int n = path.length() - 1;
-	for (int i = 0; i < (path.length() / 2); i++) {
-		//Using the swap method to switch values at each index
-		swap(path[i], path[n]);
-		n = n - 1;
+	for (int i = 0; i < 100; i++)
+	{
+		if (path[i] != -1)
+		{
+			cout << path[i];
+			if (i != 99)
+			{
+				cout << ", ";
+			}
+		}
 	}
-	std::cout << path << endl;
+	cout << ">" << endl;
 }
 void weightOf(int source, int destination, vertex* vertexList)
 {
-	printf("%12.4f\n", vertexList[destination - 1].distance);
-}
-void swap(char* x, char* y)
-{
-	char tmp;
-	tmp = *x;
-	*x = *y;
-	*y = tmp;
+	printf("The path weight is: %12.4f\n", vertexList[destination - 1].distance);
 }

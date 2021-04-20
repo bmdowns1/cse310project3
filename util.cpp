@@ -1,7 +1,6 @@
-﻿#include "util.h";
-#include <fstream>;
-#include <iostream>;
-
+﻿#include "util.h"
+#include <fstream>
+#include <iostream>
 std::string* parseFileData(std::string fileName)
 {
 	int numVertexes, numEdges;
@@ -71,11 +70,12 @@ adjList getCommand(adjList a)
 		command = line.substr(0, line.find(" "));
 		if (command == "find") {
 			std::cin >> source; std::cin >> destination; std::cin >>flag;
-			if (source == NULL || destination == NULL || !(flag == 0 || flag == 1) || source > a.numVertexes || source <= 0 )
+			if (/*source == NULL || destination == NULL ||*/ !(flag == 0 || flag == 1) || source > a.numVertexes || source <= 0 )
 			{
+				std::cout << "Query: find " << source << " " << destination << " " << flag << std::endl;
 				std::cout << "Error: invalid find query\n";
 				std::cin.clear();
-				std::cin.ignore(INT_MAX, '\n');
+				std::cin.ignore(214748364, '\n');
 				std::cin.clear();
 				line = "";
 				command = "";
@@ -94,18 +94,18 @@ adjList getCommand(adjList a)
 			{
 				std::cout << "Error: no path computation done\n" << std::endl;
 			}
-			if (source == NULL || destination == NULL || source > a.numVertexes || destination > a.numVertexes || source <= 0 || destination <= 0 || s != source)
+			if (/*source == NULL || destination == NULL ||*/ source > a.numVertexes || destination > a.numVertexes || source <= 0 || destination <= 0 || s != source)
 			{
-				std::cout << "Query: write " << source << " " << destination << std::endl;
+				std::cout << "Query: write path " << source << " " << destination << std::endl;
 				std::cout << "Error: invalid source destination pair\n";
 				std::cin.clear();
-				std::cin.ignore(INT_MAX, '\n');
+				std::cin.ignore(214748364, '\n');
 				std::cin.clear();
 				line = "";
 				command = "";
 			}
 			else {
-				std::cout << "Query: write " << source << " " << destination << std::endl;
+				std::cout << "Query: write path " << source << " " << destination << std::endl;
 				/*case 1 THE SHORTEST PATH HAS BEEN COMPUTED */
 				//IF BOTH NODES ARE BLACK OR IF DJISTRA VERTEXLIST = VERTEXLIST
 
@@ -114,15 +114,13 @@ adjList getCommand(adjList a)
 				{
 					std::cout << "Shortest path: "; 
 					shortestPath(source, destination, vertexList);
-					std::cout << "The path weight is : ";
 					weightOf(source, destination, vertexList);
 				}
 				/*case 2 THE PATH IS COMPUTED BUT IS NOT KNOWN TO BE THE SHORTEST */
 				//IF THE DESTINATION IS STILL IN THE HEAP (GREY) AND DJI(SOURCE, DESTINATION).DISTANCE != INFINITY
 				else if (vertexList[destination - 1].distance != 214748364 && vertexList[destination-1].color == 1){
-					std::cout << "Path not known to be shortest : ";
+					std::cout << "Path not known to be shortest: ";
 					shortestPath(source, destination, vertexList);
-					std::cout << "The path weight is: ";
 					weightOf(source, destination, vertexList);
 				}
 				/*case 4 THE PATH DOES NOT EXIST */

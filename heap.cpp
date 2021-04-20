@@ -31,7 +31,7 @@ vertex* extractMin(HEAP* heap, int flag)
 	}
 
 	if (flag == 1) {
-		printf("Delete vertex% d, key = % 12.4f\n", vert->id, vert->distance);
+		printf("Delete vertex %d, key=%12.4f\n", vert->id, vert->distance);
 	}
 	heapify(heap, heap->size, 0);
 	return vert;
@@ -100,7 +100,7 @@ void insertHeap(HEAP* heap, vertex* v, int flag)
 		heap->v[heap->size] = v;
 		if (flag == 1)
 		{
-			printf("Insert vertex % d, key = % 12.4f\n", v->id, heap->v[heap->size]->distance);
+			printf("Insert vertex %d, key=%12.4f\n", v->id, heap->v[heap->size]->distance);
 		}
 		heap->size++;
 		upwardHeapify(heap, heap->size-1);
