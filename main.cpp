@@ -3,9 +3,9 @@ using namespace std;
 int main(int argc, char** argv)
 {
 	std::string fileName = "test.txt";
-	bool isDirected = true;
+	bool isDirected = false;
 	//command line interpreter for ./dijkstra <graph> <direction>
-		
+		/*
 		fileName = argv[argc-2]; //set fileName to <graph>
 		std::string direction = argv[argc - 1];
 		
@@ -19,7 +19,7 @@ int main(int argc, char** argv)
 		}
 		//cout << fileName << endl;
 		//cout << isDirected << endl;
-		
+		*/
 		string* data = parseFileData(fileName);
 		int numVertexes = getFileVertexes(fileName);
 		int numEdges = getFileEdges(fileName);

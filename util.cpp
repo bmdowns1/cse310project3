@@ -84,6 +84,10 @@ adjList getCommand(adjList a)
 				std::cout << "Query: find " << source << " " << destination << " " << flag << std::endl;
 				s = source;
 				d = destination;
+				for (int i = 0; i < sizeof(*vertexList) / sizeof(vertexList[0]); i++)
+				{
+					delete &vertexList[i];
+				}
 				delete vertexList;
 				vertexList = dijkstra(&a, source, destination, flag);
 			}
@@ -138,7 +142,7 @@ adjList getCommand(adjList a)
 				else{ std::cout << "case 5" << std::endl; }
 			}
 		}
-		else if (command == "stop") { printf("Query: stop\n");/*FREE vertexList */exit(0); }
+		else if (command == "stop") { printf("Query: stop\n"); delete vertexList; delete &a; exit(0); }
 		else if (command == "") {}
 		else { std::cout << "invalid input" << command << std::endl; }
 		line = "";
